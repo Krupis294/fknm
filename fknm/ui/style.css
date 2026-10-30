@@ -7,6 +7,29 @@
  * surfaces (window, dialogs) use --window-radius (8px).
  */
 
+/*
+ * Themes in ~/.config/gtk-4.0/gtk.css still paint with the named colors of
+ * GTK 4 themes; the same palette under those names keeps them in line.
+ */
+@define-color window_bg_color #0f1010;
+@define-color window_fg_color #dddddd;
+@define-color view_bg_color #0f1010;
+@define-color view_fg_color #dddddd;
+@define-color headerbar_bg_color #0f1010;
+@define-color headerbar_fg_color #dddddd;
+@define-color headerbar_backdrop_color #0f1010;
+@define-color headerbar_border_color #262a2a;
+@define-color sidebar_bg_color #0f1010;
+@define-color card_bg_color #161818;
+@define-color card_fg_color #dddddd;
+@define-color dialog_bg_color #0f1010;
+@define-color dialog_fg_color #dddddd;
+@define-color popover_bg_color #161818;
+@define-color popover_fg_color #dddddd;
+@define-color accent_bg_color #87d5a2;
+@define-color accent_fg_color #0f1010;
+@define-color accent_color #87d5a2;
+
 :root {
   --sw-surface: #161818;
   --sw-surface-hover: #1b1e1e;
@@ -54,12 +77,13 @@ list.boxed-list {
 
 /* -- header ------------------------------------------------------------ */
 
-viewswitcher button {
+inline-view-switcher toggle {
   border-radius: var(--sw-radius);
   color: var(--sw-dim);
+  padding: 4px 12px;
 }
 
-viewswitcher button:checked {
+inline-view-switcher toggle:checked {
   background-color: var(--sw-surface);
   color: var(--window-fg-color);
   box-shadow: inset 0 -2px 0 var(--accent-color);

@@ -57,8 +57,10 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.tailscale_label = Gtk.Label(label="● tailscale", css_classes=["tailscale", "off"],
                                          tooltip_text="Tailscale neběží")
-        header = Adw.HeaderBar(title_widget=Adw.ViewSwitcher(stack=self.view_stack,
-                                                             policy=Adw.ViewSwitcherPolicy.WIDE))
+        self.view_switcher = Adw.InlineViewSwitcher(stack=self.view_stack,
+                                                    display_mode=Adw.InlineViewSwitcherDisplayMode.LABELS,
+                                                    css_classes=["flat"])
+        header = Adw.HeaderBar(title_widget=self.view_switcher)
         header.pack_end(self.tailscale_label)
 
         self.toast_overlay = Adw.ToastOverlay(child=self.view_stack)

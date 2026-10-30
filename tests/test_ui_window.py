@@ -60,6 +60,22 @@ class MainWindowTest(unittest.TestCase):
         self.assertTrue(self.window.tailscale_label.has_css_class("off"))
         self.assertIsNone(self.window.last_toast)
 
+    def test_app_style_wins_over_user_theme(self):
+        # ~/.config/gtk-4.0/gtk.css loads at USER priority with its own @define-color palette.
+        from fknm.ui.style import apply_style
+
+        apply_style()
+        window = Gtk.Window()
+        self.addCleanup(window.destroy)
+        color = window.get_color()
+
+        self.assertEqual([round(c * 255) for c in (color.red, color.green, color.blue)], [0xdd, 0xdd, 0xdd])
+
+    def test_view_switcher_shows_labels_only(self):
+        switcher = self.window.view_switcher
+        self.assertIsInstance(switcher, Adw.InlineViewSwitcher)
+        self.assertEqual(switcher.get_display_mode(), Adw.InlineViewSwitcherDisplayMode.LABELS)
+
     def test_toast_is_remembered(self):
         self.window.toast("Uloženo.")
         self.assertEqual(self.window.last_toast, "Uloženo.")

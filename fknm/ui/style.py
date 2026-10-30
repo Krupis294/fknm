@@ -20,6 +20,7 @@ def apply_style() -> None:
     Gtk.Settings.get_default().set_property("gtk-font-rendering", Gtk.FontRendering.MANUAL)
     provider = Gtk.CssProvider()
     provider.load_from_path(str(STYLE_PATH))
+    # Above USER: a theme in ~/.config/gtk-4.0/gtk.css would otherwise repaint the app.
     Gtk.StyleContext.add_provider_for_display(
-        Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1
     )
