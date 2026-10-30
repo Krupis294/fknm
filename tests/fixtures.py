@@ -101,3 +101,54 @@ SCAN = (
 
 def ssid_show(uuid: str) -> list[str]:
     return ["nmcli", "-t", "-f", "802-11-wireless.ssid", "connection", "show", "uuid", uuid]
+
+# `ip -j addr`: wlan0 as captured; lo, the adapter, tailscale0 and virbr0 trimmed to the fields used.
+ADDR = """[
+ {"ifname": "lo", "operstate": "UNKNOWN", "addr_info": [{"family": "inet", "local": "127.0.0.1", "prefixlen": 8}]},
+ {"ifname": "enp197s0f4u1u1", "operstate": "DOWN", "addr_info": []},
+ {"ifname": "wlan0", "operstate": "UP", "address": "2c:9c:58:73:e1:39", "addr_info": [
+   {"family": "inet", "local": "192.168.88.191", "prefixlen": 24, "broadcast": "192.168.88.255",
+    "scope": "global", "dynamic": true, "noprefixroute": true, "label": "wlan0"},
+   {"family": "inet6", "local": "fe80::a1fb:d68e:8f38:7ec4", "prefixlen": 64, "scope": "link",
+    "noprefixroute": true}]},
+ {"ifname": "tailscale0", "operstate": "UNKNOWN", "addr_info": [
+   {"family": "inet6", "local": "fe80::2277:1a1a:74af:5fe7", "prefixlen": 64, "scope": "link"}]},
+ {"ifname": "virbr0", "operstate": "DOWN", "addr_info": [
+   {"family": "inet", "local": "192.168.122.1", "prefixlen": 24}]}
+]"""
+
+ADDR_TAILSCALE_WITH_INET = """[
+ {"ifname": "tailscale0", "operstate": "UNKNOWN", "addr_info": [
+   {"family": "inet", "local": "100.101.102.103", "prefixlen": 32},
+   {"family": "inet6", "local": "fe80::2277:1a1a:74af:5fe7", "prefixlen": 64}]}
+]"""
+
+# `ip -j route` as captured.
+ROUTES = """[
+ {"dst": "default", "gateway": "192.168.88.1", "dev": "wlan0", "protocol": "dhcp",
+  "prefsrc": "192.168.88.191", "metric": 600, "flags": []},
+ {"dst": "192.168.88.0/24", "dev": "wlan0", "protocol": "kernel", "scope": "link",
+  "prefsrc": "192.168.88.191", "metric": 600, "flags": []},
+ {"dst": "192.168.122.0/24", "dev": "virbr0", "protocol": "kernel", "scope": "link",
+  "prefsrc": "192.168.122.1", "flags": ["linkdown"]}
+]"""
+
+PROFILE_ROUTE = '{"dst": "10.8.0.0/16", "gateway": "192.168.88.5", "dev": "wlan0", "protocol": "static", ' \
+                '"metric": 100, "flags": []}'
+ROUTES_WITH_PROFILE = ROUTES[:-1] + "," + PROFILE_ROUTE + "]"
+
+ROUTES6 = """[
+ {"dst": "fe80::/64", "dev": "tailscale0", "protocol": "kernel", "metric": 256, "flags": [], "pref": "medium"},
+ {"dst": "fe80::/64", "dev": "wlan0", "protocol": "kernel", "metric": 1024, "flags": [], "pref": "medium"}
+]"""
+
+ACTIVE = ["nmcli", "-t", "-f", "DEVICE,UUID,NAME,TYPE", "connection", "show", "--active"]
+ACTIVE_LIST = "wlan0:u1:ToliLeng:802-11-wireless\nlo:u2:lo:loopback\nvirbr0:u3:virbr0:bridge\n"
+
+DEVICE_SHOW = ["nmcli", "-t", "-f", "GENERAL.DEVICE,IP4.DNS", "device", "show"]
+DEVICE_SHOW_OUT = (
+    "GENERAL.DEVICE:wlan0\nIP4.DNS[1]:192.168.88.239\nIP4.DNS[2]:192.168.88.1\n\n"
+    "GENERAL.DEVICE:lo\n\nGENERAL.DEVICE:virbr0\n\nGENERAL.DEVICE:p2p-dev-wlan0\n"
+)
+
+RESOLV = "nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch .\n"
