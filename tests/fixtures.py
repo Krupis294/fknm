@@ -152,3 +152,30 @@ DEVICE_SHOW_OUT = (
 )
 
 RESOLV = "nameserver 127.0.0.53\noptions edns0 trust-ad\nsearch .\n"
+
+
+def standard_runner():
+    """A FakeRunner answering every read the UI makes, with the fixtures above."""
+    from fknm.profiles import PROFILE_FIELDS
+    from tests.fakes import FakeRunner
+
+    runner = FakeRunner()
+    show = ["nmcli", "-t", "-f", ",".join(PROFILE_FIELDS), "connection", "show", "uuid"]
+    runner.respond(["ip", "-j", "addr"], ADDR)
+    runner.respond(["ip", "-j", "route"], ROUTES)
+    runner.respond(["ip", "-j", "-6", "route"], ROUTES6)
+    runner.respond(["ip", "-j", "link", "show"], ADAPTER_LINK)
+    runner.respond(["nmcli", "-t", "-f", "NAME,UUID,TYPE,DEVICE,ACTIVE,AUTOCONNECT,TIMESTAMP", "connection", "show"],
+                   PROFILES_LIST)
+    runner.respond(show + ["u1"], TOLILENG_SETTINGS)
+    runner.respond(show + ["u4"], WIRED_SETTINGS)
+    runner.respond(ssid_show("u1"), "802-11-wireless.ssid:ToliLeng\n")
+    runner.respond(SCAN_NO, SCAN)
+    runner.respond(SCAN_YES, SCAN)
+    runner.respond(["nmcli", "-t", "radio", "wifi"], "enabled\n")
+    runner.respond(["nmcli", "-t", "-f", "TYPE", "device"], "wifi\nethernet\nloopback\nbridge\n")
+    runner.respond(["nmcli", "-t", "-f", "TYPE,STATE", "device"],
+                   "wifi:connected\nethernet:unavailable\nloopback:connected (externally)\n")
+    runner.respond(ACTIVE, ACTIVE_LIST)
+    runner.respond(DEVICE_SHOW, DEVICE_SHOW_OUT)
+    return runner

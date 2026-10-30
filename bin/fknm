@@ -1,0 +1,10 @@
+#!/usr/bin/python3
+# fknm launcher; runs the app straight from the source checkout.
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from fknm.ui.app import main  # noqa: E402
+
+sys.exit(main())

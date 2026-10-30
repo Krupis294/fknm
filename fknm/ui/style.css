@@ -1,0 +1,302 @@
+/*
+ * fknm: the dark "terminal" look of SSH Wallet, matched to the kitty setup
+ * (FantasqueSansM Nerd Font Mono, near-black background, green accent from
+ * the kitty palette). Stock widgets follow through libadwaita's CSS variables.
+ *
+ * Shape rule: controls (buttons, entries, tags, lists) use --sw-radius (4px),
+ * surfaces (window, dialogs) use --window-radius (8px).
+ */
+
+:root {
+  --sw-surface: #161818;
+  --sw-surface-hover: #1b1e1e;
+  --sw-line: #262a2a;
+  --sw-dim: #8a918f;
+  --sw-warning: #e5c07b;
+  --sw-radius: 4px;
+
+  --window-bg-color: #0f1010;
+  --window-fg-color: #dddddd;
+  --view-bg-color: #0f1010;
+  --view-fg-color: #dddddd;
+  --headerbar-bg-color: #0f1010;
+  --headerbar-fg-color: #dddddd;
+  --headerbar-backdrop-color: #0f1010;
+  --headerbar-border-color: #262a2a;
+  --headerbar-shade-color: #262a2a;
+  --card-bg-color: #161818;
+  --card-fg-color: #dddddd;
+  --dialog-bg-color: #0f1010;
+  --dialog-fg-color: #dddddd;
+  --popover-bg-color: #161818;
+  --popover-fg-color: #dddddd;
+  --accent-bg-color: #87d5a2;
+  --accent-fg-color: #0f1010;
+  --accent-color: #87d5a2;
+  --border-color: #262a2a;
+  --window-radius: 8px;
+}
+
+window {
+  font-family: "FantasqueSansM Nerd Font Mono", "Fira Code", monospace;
+  font-size: 14pt;
+}
+
+/* Shape: one radius for every control. */
+button,
+button.pill,
+entry,
+spinbutton,
+toast,
+list.boxed-list {
+  border-radius: var(--sw-radius);
+}
+
+/* -- header ------------------------------------------------------------ */
+
+viewswitcher button {
+  border-radius: var(--sw-radius);
+  color: var(--sw-dim);
+}
+
+viewswitcher button:checked {
+  background-color: var(--sw-surface);
+  color: var(--window-fg-color);
+  box-shadow: inset 0 -2px 0 var(--accent-color);
+}
+
+.tailscale {
+  margin: 0 8px;
+}
+
+.tailscale.on {
+  color: var(--accent-color);
+}
+
+.tailscale.off {
+  color: var(--sw-dim);
+}
+
+/* -- prompt (search) ---------------------------------------------------- */
+
+.prompt-bar {
+  padding: 8px 16px 12px 16px;
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.prompt {
+  color: var(--accent-color);
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.prompt-bar entry.search,
+.prompt-bar entry.search:focus-within {
+  background: none;
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+  min-height: 30px;
+}
+
+/* -- item lists (networks, profiles, status) ----------------------------- */
+
+list.item-list {
+  background: none;
+}
+
+list.item-list > row {
+  padding: 10px 12px 10px 13px;
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid var(--sw-line);
+  border-radius: 0;
+  background: none;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+
+list.item-list > row:hover {
+  background-color: var(--sw-surface-hover);
+}
+
+list.item-list > row:selected {
+  background-color: var(--sw-surface);
+  border-left-color: var(--accent-color);
+}
+
+/* The name sits above the address; libadwaita's 3px gap is tight at 14pt. */
+list.item-list > row > box.header > box.title {
+  border-spacing: 5px;
+}
+
+list.item-list > row label.title {
+  font-weight: bold;
+}
+
+list.item-list > row label.subtitle {
+  color: var(--sw-dim);
+  opacity: 1;
+  font-size: 13pt;
+}
+
+.badge {
+  color: var(--sw-dim);
+  border: 1px solid var(--sw-line);
+  border-radius: var(--sw-radius);
+  padding: 0 6px;
+  font-size: 12pt;
+}
+
+.badge.ok {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+/* Where a route or DNS server comes from: profil, DHCP, kernel, bez profilu. */
+.origin {
+  color: var(--sw-dim);
+  border: 1px dashed var(--sw-line);
+  border-radius: var(--sw-radius);
+  padding: 0 6px;
+  font-size: 11pt;
+}
+
+.signal {
+  color: var(--window-fg-color);
+  letter-spacing: -1px;
+}
+
+.signal .dim,
+.signal.dim {
+  color: var(--sw-line);
+}
+
+.signal.ok {
+  color: var(--accent-color);
+}
+
+.section-title {
+  padding: 10px 14px 4px 14px;
+  color: var(--sw-dim);
+  font-size: 12pt;
+  letter-spacing: 1px;
+}
+
+/* Row actions stay out of the way until the row is hovered or selected. */
+button.row-action {
+  opacity: 0;
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--sw-dim);
+  transition: opacity 150ms ease-out, background-color 150ms ease-out;
+}
+
+list.item-list > row:hover button.row-action,
+list.item-list > row:selected button.row-action,
+button.row-action:focus-visible {
+  opacity: 1;
+}
+
+button.row-action:hover {
+  color: var(--window-fg-color);
+  background-color: var(--sw-line);
+}
+
+button.row-action.connect {
+  color: var(--accent-color);
+}
+
+button.row-action.connect:hover {
+  background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
+}
+
+.section-title button {
+  color: var(--accent-color);
+  min-height: 26px;
+  padding: 0 8px;
+}
+
+/* -- status pages and hints --------------------------------------------- */
+
+statuspage .title {
+  font-size: 18pt;
+}
+
+statuspage .description {
+  color: var(--sw-dim);
+}
+
+.hints {
+  padding: 9px 16px;
+  border-top: 1px solid var(--sw-line);
+  color: var(--sw-dim);
+  font-size: 12pt;
+}
+
+.hints .key {
+  color: var(--window-fg-color);
+}
+
+.load-error {
+  padding: 6px 16px;
+  color: var(--sw-warning);
+  font-size: 12pt;
+  border-bottom: 1px solid var(--sw-line);
+}
+
+/* -- form ------------------------------------------------------------------ */
+
+list.boxed-list {
+  background-color: var(--sw-surface);
+  box-shadow: none;
+  border: 1px solid var(--sw-line);
+}
+
+list.boxed-list > row {
+  border-color: var(--sw-line);
+}
+
+/*
+ * Row metrics for the 14pt text. libadwaita sizes rows for ~11pt and gives
+ * them a fixed minimum height, so single-line rows float in the middle while
+ * two-line rows fill theirs. Instead every row gets the same padding above
+ * and below its text, so the distance between the texts of consecutive rows
+ * is even whatever the row holds.
+ */
+list.boxed-list > row > box.header {
+  min-height: 0;
+}
+
+list.boxed-list > row > box.header > box.title {
+  margin-top: 17px;
+  margin-bottom: 17px;
+  border-spacing: 8px;
+}
+
+list.boxed-list > row.entry > box.header > .editable-area {
+  padding: 15px 6px 14px 6px;
+}
+
+list.boxed-list > row.entry > box.header > .editable-area > text {
+  margin-top: 5px;
+}
+
+list.boxed-list > row.error {
+  box-shadow: inset 3px 0 0 #e06c75;
+}
+
+.form-error {
+  color: #e06c75;
+}
+
+.warning {
+  color: var(--sw-warning);
+  font-size: 12pt;
+}
+
+list.boxed-list > row.route-row > box {
+  margin: 10px 12px;
+}
+
+row.route-row entry {
+  min-height: 34px;
+}
