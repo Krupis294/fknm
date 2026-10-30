@@ -60,5 +60,5 @@ class AddDialog(FormDialog):
 
     def _validate(self) -> None:
         error = self.validation_error()
-        self.add_button.set_sensitive(error is None and bool(self._devices))
+        self.set_ready(error is None and bool(self._devices))
         self.add_button.set_tooltip_text(error)

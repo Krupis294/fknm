@@ -131,5 +131,5 @@ class EapDialog(FormDialog):
 
     def _validate(self) -> None:
         error = self.form.validation_error()
-        self.connect_button.set_sensitive(error is None)
+        self.set_ready(error is None)
         self.connect_button.set_tooltip_text(error)

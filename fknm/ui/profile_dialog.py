@@ -223,7 +223,7 @@ class ProfileDialog(FormDialog):
         if not hasattr(self, "routes_group"):
             return
         error = self.validation_error()
-        self.save_button.set_sensitive(error is None)
+        self.set_ready(error is None)
         self.save_button.set_tooltip_text(error)
         self.show_error(error)
 

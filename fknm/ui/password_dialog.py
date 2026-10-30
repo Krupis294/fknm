@@ -30,6 +30,6 @@ class PasswordDialog(FormDialog):
     def _validate(self) -> None:
         password = self.password_row.get_text()
         error = check_psk(password)
-        self.connect_button.set_sensitive(error is None)
+        self.set_ready(error is None)
         # An empty field is not an error yet, just not ready.
         self.show_error(error if password else None)

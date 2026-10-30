@@ -107,7 +107,8 @@ class MainWindow(Adw.ApplicationWindow):
                 return
             settings, active = result
             dialog = ProfileDialog(
-                settings, on_save=lambda s, secrets: self._save(dialog, s, secrets, device, active),
+                settings, on_save=lambda s, secrets: self._save(dialog, s, secrets, device, active,
+                                                                s.eap != settings.eap),
                 on_delete=lambda: self._delete(settings.uuid, settings.name))
             dialog.present(self)
 
@@ -132,23 +133,25 @@ class MainWindow(Adw.ApplicationWindow):
             dialog.set_busy(True)
 
         def done(_result, error):
+            open_dialog = dialog if dialog is not None and not dialog.closed else None
             if error:
                 message = f"{error_prefix}{error}"
-                if dialog:
-                    dialog.set_busy(False)
-                    dialog.show_error(message)
+                if open_dialog:
+                    open_dialog.set_busy(False)
+                    open_dialog.show_error(message)
                 else:
                     self.toast(message, timeout=8)
                 return
-            if dialog:
-                dialog.close()
+            if open_dialog:
+                open_dialog.close()
             self.toast(done_message)
             self.refresh_all()
 
         self.background(work, done)
 
-    def _save(self, dialog, settings, secrets, device: str, active: bool) -> None:
-        self.run_action(lambda: save(self.runner, settings, secrets, device=device, reactivate=active),
+    def _save(self, dialog, settings, secrets, device: str, active: bool, write_eap: bool) -> None:
+        self.run_action(lambda: save(self.runner, settings, secrets, device=device, reactivate=active,
+                                     write_eap=write_eap),
                         "Uloženo.", dialog=dialog)
 
     def _delete(self, uuid: str, name: str) -> None:

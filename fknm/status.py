@@ -194,7 +194,7 @@ def read_status(runner: Runner, resolv_path: Path = Path("/etc/resolv.conf")) ->
 def _edit(runner: Runner, uuid: str, device: str, change) -> None:
     settings = read_settings(runner, uuid)
     change(settings.ipv4)
-    save(runner, settings, device=device, reactivate=True)
+    save(runner, settings, device=device, reactivate=True, write_eap=False)
 
 
 def add_route(runner: Runner, uuid: str, device: str, route: Route) -> None:

@@ -183,3 +183,14 @@ class RunTest(unittest.TestCase):
 
         self.assertEqual(self.run_with(rofi), 1)
         self.assertEqual(rofi.calls, [(["rofi", "-e", "Žádná Wi-Fi karta."], "")])
+
+
+class NetworkManagerDownTest(unittest.TestCase):
+    def test_nmcli_failure_is_shown(self):
+        runner = fixtures.standard_runner()
+        runner.respond(["nmcli", "-t", "-f", "TYPE", "device"], returncode=8,
+                       stderr="Error: NetworkManager is not running.\n")
+        rofi = ScriptedRofi()
+
+        self.assertEqual(run(runner, rofi, None, open_gui=lambda: None, open_eap=lambda _s: None), 1)
+        self.assertEqual(rofi.calls, [(["rofi", "-e", "Sítě nejde načíst: NetworkManager is not running."], "")])

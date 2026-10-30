@@ -165,3 +165,13 @@ class EditTest(unittest.TestCase):
 
         self.assertEqual(self.modify_value(runner, "ipv4.dns"), "9.9.9.9")
         self.assertEqual(runner.argvs()[-1], ["nmcli", "connection", "up", "uuid", "u1"])
+
+
+class EapUntouchedTest(unittest.TestCase):
+    def test_dns_edit_does_not_rewrite_eap(self):
+        runner = edit_runner(fixtures.EDUROAM_SETTINGS.replace("connection.uuid:u5", "connection.uuid:u1"))
+
+        add_dns(runner, "u1", "wlan0", "1.1.1.1")
+
+        modify = next(a for a in runner.argvs() if a[1:3] == ["connection", "modify"])
+        self.assertNotIn("802-1x.eap", modify)

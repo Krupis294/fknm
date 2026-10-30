@@ -280,3 +280,22 @@ class SubtitleTest(unittest.TestCase):
         self.assertEqual(profile_subtitle(inactive_eth, dhcp, "disconnected"), "DHCP")
         self.assertEqual(profile_subtitle(inactive_wifi, manual, None), "ručně · 10.0.12.40/24 · DNS 10.0.12.1")
         self.assertEqual(profile_subtitle(inactive_wifi, disabled, None), "vypnuto")
+
+
+class SecurityMappingTest(unittest.TestCase):
+    def test_owe_profile_has_no_password(self):
+        text = fixtures.TOLILENG_SETTINGS.replace("key-mgmt:wpa-psk", "key-mgmt:owe")
+        self.assertEqual(read_settings(runner_with(text), "u1").security, "open")
+
+    def test_unknown_key_mgmt_has_no_password(self):
+        text = fixtures.TOLILENG_SETTINGS.replace("key-mgmt:wpa-psk", "key-mgmt:something-new")
+        self.assertEqual(read_settings(runner_with(text), "u1").security, "open")
+
+    def test_save_can_leave_eap_untouched(self):
+        runner = mutating_runner()
+        settings = wifi_settings()
+        settings.security, settings.eap = "eap", Eap(identity="jan")
+
+        save(runner, settings, write_eap=False)
+
+        self.assertNotIn("802-1x.eap", runner.argvs()[0])

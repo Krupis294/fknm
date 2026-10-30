@@ -118,13 +118,16 @@ def run(runner, rofi, theme: Path | None, open_gui, open_eap) -> int:
         rofi(["rofi", "-e", message] + (["-theme", str(theme)] if theme else []), "")
         return 1
 
-    state = radio_state(runner)
+    try:
+        state = radio_state(runner)
+        nets = scan(runner) if state == "enabled" else []
+    except NmcliError as e:
+        return error(f"Sítě nejde načíst: {e}")
     if state == "missing":
         return error("Žádná Wi-Fi karta.")
     if state == "disabled":
         return error("Wi-Fi je vypnutá. Zapni ji v fknm.")
 
-    nets = scan(runner)
     while True:
         addr = runner(["ip", "-j", "addr"], None)
         rows = network_rows(nets) + [Row(RESCAN_ENTRY, f"<i>{RESCAN_ENTRY}</i>", permanent=True),
@@ -134,7 +137,10 @@ def run(runner, rofi, theme: Path | None, open_gui, open_eap) -> int:
         if index is None:
             return 0
         if index == len(nets):
-            nets = scan(runner, rescan=True)
+            try:
+                nets = scan(runner, rescan=True)
+            except NmcliError as e:
+                return error(f"Sítě nejde načíst: {e}")
             continue
         if index > len(nets):
             open_gui()

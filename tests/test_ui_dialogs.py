@@ -9,6 +9,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk  # noqa: E402
 
 from fknm.model import Eap, Ipv4, ProfileSettings, Route  # noqa: E402
+from fknm.profiles import PROFILE_FIELDS  # noqa: E402
 from tests import fixtures  # noqa: E402
 from tests.fakes import sync_background  # noqa: E402
 
@@ -138,6 +139,33 @@ class WindowDialogsTest(unittest.TestCase):
 
         self.assertFalse(any(a[1:3] == ["connection", "up"] for a in self.runner.argvs()))
 
+    def test_saving_untouched_eap_profile_keeps_its_eap_settings(self):
+        show = ["nmcli", "-t", "-f", ",".join(PROFILE_FIELDS), "connection", "show", "uuid", "u5"]
+        self.runner.respond(show, fixtures.EDUROAM_SETTINGS)
+        self.runner.respond(["nmcli", "connection", "modify"])
+
+        self.window.open_profile("u5", "")
+        self.window.get_visible_dialog().save_button.emit("clicked")
+
+        modify = next(a for a in self.runner.argvs() if a[1:3] == ["connection", "modify"])
+        self.assertNotIn("802-1x.eap", modify)
+
+    def test_error_after_closing_busy_dialog_is_toasted(self):
+        from fknm.nmcli import NmcliError
+        from fknm.ui.password_dialog import PasswordDialog
+
+        dialog = PasswordDialog("Sousedi", "WPA3", on_connect=lambda _p: None)
+        dialog.present(self.window)
+        pending = []
+        self.window.background = lambda fn, on_done: pending.append(on_done)
+
+        self.window.run_action(lambda: None, "Připojeno k Sousedi.", error_prefix="Nepřipojeno k Sousedi: ",
+                               dialog=dialog)
+        dialog.close()
+        pending[0](None, NmcliError("špatné heslo"))
+
+        self.assertEqual(self.window.last_toast, "Nepřipojeno k Sousedi: špatné heslo")
+
     def test_open_eap_out_of_range(self):
         self.window.open_eap("Nikde")
         self.assertEqual(self.window.last_toast, "Síť Nikde není v dosahu.")
@@ -179,6 +207,18 @@ class SmallDialogsTest(unittest.TestCase):
         d.password_row.set_text("password1")
         d.connect_button.emit("clicked")
         self.assertEqual(calls, ["password1"])
+
+    def test_busy_dialog_keeps_its_button_disabled(self):
+        from fknm.ui.password_dialog import PasswordDialog
+
+        d = PasswordDialog("Sousedi", "WPA3", on_connect=lambda _p: None)
+        d.password_row.set_text("password1")
+        d.set_busy(True)
+        d.password_row.set_text("password2")
+        self.assertFalse(d.connect_button.get_sensitive())
+
+        d.set_busy(False)
+        self.assertTrue(d.connect_button.get_sensitive())
 
     def test_eap_warning_and_tls_fields(self):
         from fknm.ui.eap_form import EapForm

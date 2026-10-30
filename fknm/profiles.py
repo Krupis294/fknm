@@ -25,7 +25,8 @@ SECRET_PROPS = {
 }
 
 _KINDS = {"802-11-wireless": "wifi", "802-3-ethernet": "ethernet"}
-_SECURITY = {"": "open", "none": "open", "wpa-psk": "psk", "sae": "sae", "wpa-eap": "eap"}
+# Unknown key management gets no password field rather than a wrong one.
+_SECURITY = {"wpa-psk": "psk", "sae": "sae", "wpa-eap": "eap", "wpa-eap-suite-b-192": "eap"}
 
 
 def _yes(value: bool) -> str:
@@ -58,7 +59,7 @@ def read_settings(runner: Runner, uuid: str) -> ProfileSettings:
     fields = parse_fields(nmcli(runner, ["-t", "-f", ",".join(PROFILE_FIELDS), "connection", "show", "uuid", uuid]))
     get = lambda key: fields.get(key, "")  # noqa: E731 - absent settings are left out by nmcli
     kind = _KINDS.get(get("connection.type"), get("connection.type"))
-    security = _SECURITY.get(get("802-11-wireless-security.key-mgmt"), "psk") if kind == "wifi" else ""
+    security = _SECURITY.get(get("802-11-wireless-security.key-mgmt"), "open") if kind == "wifi" else ""
     ipv4 = Ipv4(
         method=get("ipv4.method") or "auto",
         addresses=[a for a in get("ipv4.addresses").split(", ") if a],
@@ -152,14 +153,17 @@ def adapter_mac(runner: Runner, ifname: str) -> str | None:
 
 
 def save(runner: Runner, settings: ProfileSettings, secrets: dict[str, str] | None = None,
-         device: str = "", reactivate: bool = False) -> None:
+         device: str = "", reactivate: bool = False, write_eap: bool = True) -> None:
     """Write the profile, then its secrets, then bring it up again so the change applies now.
 
     An ethernet profile is bound to its adapter's MAC instead of the interface
     name: a USB adapter's name follows the port it is plugged into.
+
+    ``write_eap=False`` leaves the 802.1X settings alone: ``Eap`` does not model every
+    option, so a profile made elsewhere is rewritten only when its EAP fields changed.
     """
     args = settings_args(settings)
-    if settings.eap:
+    if settings.eap and write_eap:
         args += eap_args(settings.eap)
     if settings.kind == "ethernet" and (mac := adapter_mac(runner, device or settings.interface_name)):
         args += ["802-3-ethernet.mac-address", mac, "connection.interface-name", ""]

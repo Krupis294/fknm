@@ -105,7 +105,8 @@ SECURITY_LABELS = {"open": "otevřená", "psk": "WPA2", "sae": "WPA3", "eap": "8
 
 def classify_security(text: str) -> str:
     """Kind of security from the SECURITY column of ``nmcli device wifi list``."""
-    if text in ("", "--"):
+    # OWE (Enhanced Open) encrypts without a password; nmcli sets it up by itself.
+    if text in ("", "--") or "OWE" in text:
         return "open"
     if "802.1X" in text:
         return "eap"

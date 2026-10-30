@@ -12,6 +12,11 @@ from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 class FormDialog(Adw.Dialog):
     def __init__(self, title: str, primary_label: str, content_width: int = 600):
         super().__init__(title=title, content_width=content_width)
+        self._busy = False
+        self._ready = True
+        # A result that arrives after the user closed the dialog goes to a toast instead.
+        self.closed = False
+        self.connect("closed", lambda *_: setattr(self, "closed", True))
         cancel = Gtk.Button(label="Zrušit")
         cancel.connect("clicked", lambda *_: self.close())
         self.primary_button = Gtk.Button(label=primary_label, css_classes=["suggested-action"])
@@ -38,9 +43,15 @@ class FormDialog(Adw.Dialog):
         self.error_label.set_text(message or "")
         self.error_label.set_visible(bool(message))
 
+    def set_ready(self, ready: bool) -> None:
+        """Validation result: the main button works when the form is valid and nothing runs."""
+        self._ready = ready
+        self.primary_button.set_sensitive(ready and not self._busy)
+
     def set_busy(self, busy: bool) -> None:
         """While nmcli works the main button waits; the result re-enables it or closes the dialog."""
-        self.primary_button.set_sensitive(not busy)
+        self._busy = busy
+        self.primary_button.set_sensitive(self._ready and not busy)
 
 
 def entry_row(title: str, text: str = "", on_change=None, on_activate=None) -> Adw.EntryRow:

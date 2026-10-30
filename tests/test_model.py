@@ -76,3 +76,9 @@ class ValidationTest(unittest.TestCase):
         self.assertEqual(check_ipv4_settings(Ipv4(routes=[Route("10.8.0.1/16")])),
                          "Cíl routy má nastavené bity hostu, správně je např. 10.8.0.0/16.")
         self.assertIsNone(check_ipv4_settings(Ipv4()))
+
+
+class OweTest(unittest.TestCase):
+    def test_owe_is_open(self):
+        self.assertEqual(classify_security("OWE"), "open")
+        self.assertEqual(classify_security("OWE-TM"), "open")
