@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=fknm
+GenericName=Správce sítě
+Comment=Wi-Fi, IP adresy, routy a DNS přes NetworkManager
+Exec=@EXEC@
+Icon=network-wireless
+Terminal=false
+Categories=Network;
+Keywords=wifi;network;nmcli;dns;route;
+StartupNotify=true
