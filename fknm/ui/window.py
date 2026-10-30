@@ -12,6 +12,7 @@ from fknm.status import tailscale_running  # noqa: E402
 from fknm.ui.background import Background, run_in_background  # noqa: E402
 from fknm.ui.eap_form import EapDialog  # noqa: E402
 from fknm.ui.profile_dialog import ProfileDialog  # noqa: E402
+from fknm.ui.profiles_page import ProfilesPage  # noqa: E402
 from fknm.ui.wifi_page import WifiPage  # noqa: E402
 from fknm.wifi import connect_eap, scan  # noqa: E402
 
@@ -158,7 +159,7 @@ class MainWindow(Adw.ApplicationWindow):
     # -- internals --------------------------------------------------------
 
     def _build_page(self, name: str) -> Gtk.Widget:
-        builders = {"wifi": WifiPage}
+        builders = {"wifi": WifiPage, "profiles": ProfilesPage}
         return builders[name](self) if name in builders else Gtk.Box()
 
     def _add_action(self, name: str, callback) -> None:
