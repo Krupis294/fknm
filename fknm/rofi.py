@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 THEME_PATH = ROOT / "data" / "fknm.rasi"
 GUI_PATH = ROOT / "bin" / "fknm"
 RESCAN_ENTRY = "↻ Skenovat znovu"
-GUI_ENTRY = "Otevřít fknm"
+GUI_ENTRY = "Otevřít"
 ACCENT = "#87d5a2"
 BARS = "▂▄▆█"
 

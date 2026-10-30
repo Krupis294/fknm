@@ -79,7 +79,7 @@ zrovna není zapojený, vazbu nechá, jak je.
 `fknm-rofi` je rychlý výběr wifi: napíšeš kus názvu sítě, Enter a připojí se.
 Nahoře je vidět aktuální připojení a stav Tailscale. U nové WPA2/WPA3 sítě se
 zeptá na heslo, u nové 802.1X sítě otevře dialog v GTK aplikaci. Na konci jsou
-položky `↻ Skenovat znovu` a `Otevřít fknm`. Chyby ukáže v rofi okně.
+položky `↻ Skenovat znovu` a `Otevřít` (spustí GTK okno). Chyby ukáže v rofi okně.
 
 ```sh
 fknm-rofi                  # vlastní motiv (data/fknm.rasi)

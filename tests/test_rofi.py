@@ -101,6 +101,7 @@ class RunTest(unittest.TestCase):
         self.assertEqual(len(lines), 6)
         self.assertTrue(lines[-2].startswith(RESCAN_ENTRY))
         self.assertTrue(lines[-1].startswith(GUI_ENTRY))
+        self.assertTrue(lines[-1].startswith("Otevřít\0"))
         self.assertIn("wlan0 · ToliLeng · 192.168.88.191/24", visible_text(argv[argv.index("-mesg") + 1]))
 
     def test_new_psk_asks_password_and_connects(self):
