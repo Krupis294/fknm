@@ -84,3 +84,20 @@ ipv4.ignore-auto-routes:no
 """
 
 ADAPTER_LINK = '[{"ifname":"enp197s0f4u1u1","address":"f4:a8:0d:67:d0:a7","permaddr":null,"operstate":"DOWN"}]'
+
+SCAN_NO = ["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY,DEVICE", "device", "wifi", "list", "--rescan", "no"]
+SCAN_YES = SCAN_NO[:-1] + ["yes"]
+
+# Includes an escaped SSID seen on two BSSIDs and a hidden network (empty SSID).
+SCAN = (
+    "*:ToliLeng:73:WPA2:wlan0\n"
+    " :Cafe\\: A&B <x>:40:--:wlan0\n"
+    " :Cafe\\: A&B <x>:62:--:wlan0\n"
+    " ::80:WPA2:wlan0\n"
+    " :Firma:30:WPA2 802.1X:wlan0\n"
+    " :Sousedi:50:WPA3:wlan0\n"
+)
+
+
+def ssid_show(uuid: str) -> list[str]:
+    return ["nmcli", "-t", "-f", "802-11-wireless.ssid", "connection", "show", "uuid", uuid]
