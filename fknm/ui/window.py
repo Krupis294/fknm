@@ -7,8 +7,12 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio, GLib, Gtk  # noqa: E402
 
 from fknm.nmcli import NmcliError, Runner  # noqa: E402
+from fknm.profiles import delete, list_profiles, read_settings, save  # noqa: E402
 from fknm.status import tailscale_running  # noqa: E402
 from fknm.ui.background import Background, run_in_background  # noqa: E402
+from fknm.ui.eap_form import EapDialog  # noqa: E402
+from fknm.ui.profile_dialog import ProfileDialog  # noqa: E402
+from fknm.wifi import connect_eap, scan  # noqa: E402
 
 TABS = [("wifi", "Wi-Fi"), ("profiles", "Profily"), ("status", "Stav")]
 TAILSCALE_INTERVAL = 3
@@ -85,6 +89,70 @@ class MainWindow(Adw.ApplicationWindow):
         for page in self.pages.values():
             if hasattr(page, "refresh"):
                 page.refresh()
+
+    def open_profile(self, uuid: str, device: str) -> None:
+        """Edit a profile; ``device`` is where it runs or last ran, for the ethernet MAC binding."""
+        def load():
+            active = any(p.uuid == uuid and p.active for p in list_profiles(self.runner))
+            return read_settings(self.runner, uuid), active
+
+        def loaded(result, error):
+            if error:
+                self.toast(f"Profil nejde načíst: {error}", timeout=6)
+                return
+            settings, active = result
+            dialog = ProfileDialog(
+                settings, on_save=lambda s, secrets: self._save(dialog, s, secrets, device, active),
+                on_delete=lambda: self._delete(settings.uuid, settings.name))
+            dialog.present(self)
+
+        self.background(load, loaded)
+
+    def open_eap(self, ssid: str) -> None:
+        """Dialog for a new 802.1X network, also reached through ``fknm --eap SSID`` from rofi."""
+        def scanned(nets, error):
+            net = next((n for n in nets or [] if n.ssid == ssid), None)
+            if error or net is None:
+                self.toast(f"Síť {ssid} není v dosahu.", timeout=6)
+                return
+            dialog = EapDialog(ssid, net.device,
+                               on_connect=lambda eap, secrets: self._connect_eap(dialog, eap, secrets))
+            dialog.present(self)
+
+        self.background(lambda: scan(self.runner), scanned)
+
+    def run_action(self, work, done_message: str, error_prefix: str = "", dialog=None) -> None:
+        """Run a change in the background; report it as a toast (or in ``dialog``) and refresh."""
+        if dialog:
+            dialog.set_busy(True)
+
+        def done(_result, error):
+            if error:
+                message = f"{error_prefix}{error}"
+                if dialog:
+                    dialog.set_busy(False)
+                    dialog.show_error(message)
+                else:
+                    self.toast(message, timeout=8)
+                return
+            if dialog:
+                dialog.close()
+            self.toast(done_message)
+            self.refresh_all()
+
+        self.background(work, done)
+
+    def _save(self, dialog, settings, secrets, device: str, active: bool) -> None:
+        self.run_action(lambda: save(self.runner, settings, secrets, device=device, reactivate=active),
+                        "Uloženo.", dialog=dialog)
+
+    def _delete(self, uuid: str, name: str) -> None:
+        self.run_action(lambda: delete(self.runner, uuid), f"{name} smazán.")
+
+    def _connect_eap(self, dialog: EapDialog, eap, secrets) -> None:
+        self.toast(f"Připojuji k {dialog.ssid}…")
+        self.run_action(lambda: connect_eap(self.runner, dialog.ssid, dialog.device, eap, secrets),
+                        f"Připojeno k {dialog.ssid}.", dialog=dialog)
 
     # -- internals --------------------------------------------------------
 

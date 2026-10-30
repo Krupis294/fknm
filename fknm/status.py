@@ -106,7 +106,8 @@ def route_origin(r: dict, has_profile: bool) -> str:
 
 
 def resolv_summary(text: str) -> str:
-    servers = [line.split()[1] for line in text.splitlines() if line.startswith("nameserver") and len(line.split()) > 1]
+    servers = [line.split()[1] for line in text.splitlines()
+               if line.startswith("nameserver") and len(line.split()) > 1]
     if "127.0.0.53" in servers:
         return "127.0.0.53 (systemd-resolved)"
     return ", ".join(servers)
